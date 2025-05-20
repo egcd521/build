@@ -111,7 +111,7 @@ jobs:
           /* Auto-override HMBIRD_OGKI -> HMBIRD_GKI */\
           if (!strcmp(propname, "type") && prop->value &&\
             !strncmp((const char *)prop->value, "HMBIRD_OGKI", 11)) {\
-                *out_string = "HMBIRD_GKI";\
+                *out_string = "HMBIRD GKI";\
                 return 0;\
           }' drivers/of/property.c
 
