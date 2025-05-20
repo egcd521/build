@@ -182,32 +182,20 @@ jobs:
          ./patch_linux
          rm -f Image
          mv oImage Image
-
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-      - name: Checkout code via SSH
-        run: |
-         ssh -i ~/.ssh/id_ed25519 -T git@github.com || true
          
       - name: Make AnyKernel3
         run: |
          if [ "${{ github.event.inputs.FEIL }}" = "oneplus_ace5_pro" ]; then
-         git clone git@github.com:egcd123/AnyKernel3-ace5Pro.git --depth=1
+         git clone https://github.com/egcd123/AnyKernel3.git --depth=1
          fi
-         rm -rf ./AnyKernel3-ace5Pro/.git
-         rm -rf ./AnyKernel3-ace5Pro/push.sh
-         cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3-ace5Pro/
+         rm -rf ./AnyKernel3/push.sh
+         cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
 
       - name: Upload AnyKernel3
         uses: actions/upload-artifact@v4
         with:
          name: AnyKernel3_SuKiSu_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
-         path: ./AnyKernel3-ace5Pro/*
+         path: ./AnyKernel3/*
          
       - name: Upload Image
         uses: actions/upload-artifact@v4
