@@ -84,7 +84,6 @@ jobs:
            cd kernel_workspace
            git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}
            git clone https://github.com/ExmikoN/SukiSU_patch.git
-           git clone https://github.com/egcd521/111.git
 
            cd kernel_platform        
            cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
@@ -104,8 +103,18 @@ jobs:
            patch -p1 < 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch || true
            cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
            patch -p1 -F 3 < syscall_hooks.patch
-           patch -p1 -F 3 < 0002-hmbird-property-patch.patch
            echo "完成"
+
+      - name: Override HMBIRD type via sed
+        run: |
+          cd ./common/
+          sed -i '/int of_property_read_string/{
+          :a; n; /if (!prop)/!ba
+          a\
+          /* Auto-override HMBIRD_OGKI -> HMBIRD_GKI */\
+          if (!strcmp(propname, "type") && prop->value && !strcmp((const char *)prop->value, "HMBIRD_OGKI")) { *out_string = "HMBIRD_GKI"; return 0; }
+          }' drivers/of/property.c
+
 
       - name: Apply lz4kd Patches
         run: |
