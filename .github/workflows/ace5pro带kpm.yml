@@ -107,12 +107,17 @@ jobs:
       - name: Override HMBIRD type via sed
         run: |
           cd kernel_workspace/kernel_platform/common
-          sed -i '/\*out_string = prop->value;/i \
+          sed -i '/int of_property_read_string/,/return 0;/ {
+          /return 0;/i\
           /* Auto-override HMBIRD_OGKI -> HMBIRD_GKI */\
-          if (!strcmp(propname, "type") && prop->value && !strncmp(prop->value, "HMBIRD_OGKI", prop->length)) {\
+          if (!strcmp(propname, "type") &&\
+          prop->value &&\
+          !strcmp((const char *)prop->value, "HMBIRD_OGKI")) {\
           *out_string = "HMBIRD_GKI";\
           return 0;\
+          }
           }' drivers/of/property.c
+
 
       - name: Apply lz4kd Patches
         run: |
