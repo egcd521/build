@@ -108,7 +108,7 @@ jobs:
         run: |
           cd kernel_workspace/kernel_platform/common
           sed -i '/\*out_string = prop->value;/i \
-          /* Auto-override HMBIRD_OGKI -> HMBIRD GKI */\
+          /* Auto-override HMBIRD_OGKI -> HMBIRD_GKI */\
           if (!strcmp(propname, "type") && prop->value &&\
             !strncmp((const char *)prop->value, "HMBIRD_OGKI", 11)) {\
                 *out_string = "HMBIRD_GKI";\
