@@ -106,7 +106,7 @@ jobs:
 
       - name: Override HMBIRD type via sed
         run: |
-          cd ./common/
+          cd kernel_workspace/kernel_platform/common
           sed -i '/int of_property_read_string/{
           :a; n; /if (!prop)/!ba
           a\
