@@ -106,17 +106,6 @@ jobs:
            patch -p1 -F 3 < syscall_hooks.patch
            echo "完成"
 
-      - name: Override HMBIRD type via sed
-        run: |
-          cd kernel_workspace/kernel_platform/common
-          sed -i '/\*out_string = prop->value;/i \
-          /* Auto-override HMBIRD_OGKI -> HMBIRD_GKI */\
-          if (!strcmp(propname, "type") && prop->value &&\
-            !strncmp((const char *)prop->value, "HMBIRD_OGKI", 11)) {\
-                *out_string = "HMBIRD_GKI";\
-                return 0;\
-          }' drivers/of/property.c
-
       - name: Apply lz4kd Patches
         run: |
           cd kernel_workspace/kernel_platform/common
