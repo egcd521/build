@@ -111,8 +111,9 @@ jobs:
           :a; n; /if (!prop)/!ba
           a\
           /* Auto-override HMBIRD_OGKI -> HMBIRD_GKI */\
-          if (!strcmp(propname, "type") && prop->value && !strcmp((const char *)prop->value, "HMBIRD_OGKI")) { *out_string = "HMBIRD_GKI"; return 0; }
+          if (!strcmp(propname, "type") && prop->value && !strcmp((const char *)prop->value, "HMBIRD_OGKI")) { *out_strs = "HMBIRD_GKI"; return 0; }
           }' drivers/of/property.c
+
 
 
       - name: Apply lz4kd Patches
