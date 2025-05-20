@@ -34,6 +34,7 @@ jobs:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
       CCACHE_HARDLINK: "true"
+      TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
