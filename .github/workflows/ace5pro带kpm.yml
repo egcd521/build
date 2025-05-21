@@ -85,7 +85,6 @@ jobs:
            cd kernel_workspace
            git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}
            git clone https://github.com/ExmikoN/SukiSU_patch.git
-           git clone https://$TOKEN@github.com/egcd521/111.git
 
            cd kernel_platform        
            cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
@@ -96,7 +95,6 @@ jobs:
            cp -r ../SukiSU_patch/other/lz4k/lib/* ./common/lib
            cp -r ../SukiSU_patch/other/lz4k/crypto/* ./common/crypto
            # Apply patches
-           cp ../111/boot.patch ./common/
            cd ./common
 
            sed -i 's/-32,12 +32,38/-32,11 +32,37/g' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
@@ -105,7 +103,6 @@ jobs:
            patch -p1 < 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch || true
            cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
            patch -p1 -F 3 < syscall_hooks.patch
-           patch -s -p1 -F 3 < boot.patch
            echo "完成"
 
       - name: Apply lz4kd Patches
@@ -175,31 +172,27 @@ jobs:
          cd kernel_workspace/kernel_platform
          tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
 
-      - name: Make AnyKernel3
+      - name: Set up SSH
         run: |
-         cd kernel_workspace/kernel_platform/dist/
-         curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
-         chmod +x patch_linux
-         ./patch_linux
-         rm -f Image
-         mv oImage Image
-         
-      - name: Make AnyKernel3
-        run: |
-         if [ "${{ github.event.inputs.FEIL }}" = "oneplus_ace5_pro" ]; then
-         git clone https://github.com/egcd123/AnyKernel3.git --depth=1
-         fi
-         rm -rf ./AnyKernel3/push.sh
-         cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Upload AnyKernel3
-        uses: actions/upload-artifact@v4
-        with:
-         name: AnyKernel3_SuKiSu_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
-         path: ./AnyKernel3/*
+      - name: Checkout code via SSH
+        run: |
+         ssh -i ~/.ssh/id_ed25519 -T git@github.com || true
          
-      - name: Upload Image
+      - name: Prepare AnyKernel3 Packages
+        run: |
+         cd kernel_workspace/kernel_platform/dist
+         git clone git@github.com:egcd123/AnyKernel3-ace5Pro.git AnyKernel3-kpm --depth=1
+         rm -rf AnyKernel3-kpm/.git
+         rm -f AnyKernel3-kpm/push.sh
+         cp Image AnyKernel3-kpm/
+                         
+      - name: Upload AnyKernel3 (KPM)
         uses: actions/upload-artifact@v4
         with:
-         name: Image_SuKiSu_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
-         path: kernel_workspace/kernel_platform/dist/Image
+         name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}_kpm
+         path: kernel_workspace/kernel_platform/dist/AnyKernel3-kpm/*
